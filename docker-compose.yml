@@ -8,7 +8,9 @@ services:
     image: fastapi-kvstore:latest
     networks:
       - iceberg_net
-      
+    depends_on:
+      - postgres-db
+
   iceberg-rest:
     image: tabulario/iceberg-rest:latest
     container_name: iceberg-rest

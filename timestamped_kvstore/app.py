@@ -58,7 +58,7 @@ def put_data(req_body: UpdateValue):
 
 @app.get("/")
 def get_data(req_body: KeyTimestamp):
-    ''' a very sloppy route to do the lookup '''
+    ''' a very sloppy route to do the lookup. It is also strange that this GET route allows a req. body '''
     conn = connect_db()
     with conn.cursor() as cur:
         cur.execute('''
