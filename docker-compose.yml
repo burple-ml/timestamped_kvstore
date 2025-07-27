@@ -1,13 +1,13 @@
 services:
-#  fastapi-app:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#    ports:
-#      - "8080:8080"
-#    image: fastapi-kvstore:latest
-#    networks:
-#      - iceberg_net
+  fastapi-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    image: fastapi-kvstore:latest
+    networks:
+      - iceberg_net
       
   iceberg-rest:
     image: tabulario/iceberg-rest:latest
@@ -37,6 +37,20 @@ services:
       - ICEBERG_WAREHOUSE_LOCATION=/warehouse
     depends_on:
       - iceberg-rest
+
+  postgres-db:
+    image: postgres:latest
+    container_name: postgres_db
+    networks:
+      - iceberg_net
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data_pg:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
 
 networks:
   iceberg_net:
