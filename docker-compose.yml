@@ -6,3 +6,52 @@ services:
     ports:
       - "8080:8080"
     image: fastapi-kvstore:latest
+    networks:
+      - iceberg_net
+      
+  iceberg-rest:
+    image: tabulario/iceberg-rest:latest
+    container_name: iceberg-rest
+    networks:
+      - iceberg_net
+    ports:
+      - "8181:8181"
+    volumes:
+      - ./data/iceberg_warehouse:/warehouse
+    environment:
+      - CATALOG_WAREHOUSE=/warehouse
+      - CATALOG_IO__IMPL=org.apache.iceberg.hadoop.HadoopFileIO
+      - REST_PORT=8181
+
+  trino:
+    image: trinodb/trino:latest
+    container_name: trino
+    networks:
+      - iceberg_net
+    ports:
+      - "8282:8080"
+    volumes:
+      - ./catalog:/etc/trino/catalog
+      - ./data/iceberg_warehouse:/warehouse
+    environment:
+      - ICEBERG_WAREHOUSE_LOCATION=/warehouse
+    depends_on:
+      - iceberg-rest
+
+  postgres-db:
+    image: postgres:latest
+    container_name: postgres_db
+    networks:
+      - iceberg_net
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data_pg:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+
+networks:
+  iceberg_net:
+    driver: bridge
