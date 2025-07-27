@@ -6,3 +6,11 @@ services:
     ports:
       - "8080:8080"
     image: fastapi-kvstore:latest
+
+  trino:
+    image: docker.io/trinodb/trino:410
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./catalog:/etc/trino/catalog
+      - ./data:/data
