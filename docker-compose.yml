@@ -1,16 +1,43 @@
 services:
-  fastapi-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+#  fastapi-app:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8080:8080"
+#    image: fastapi-kvstore:latest
+#    networks:
+#      - iceberg_net
+      
+  iceberg-rest:
+    image: tabulario/iceberg-rest:latest
+    container_name: iceberg-rest
+    networks:
+      - iceberg_net
     ports:
-      - "8080:8080"
-    image: fastapi-kvstore:latest
+      - "8181:8181"
+    volumes:
+      - ./data/iceberg_warehouse:/warehouse
+    environment:
+      - CATALOG_WAREHOUSE=/warehouse
+      - CATALOG_IO__IMPL=org.apache.iceberg.hadoop.HadoopFileIO
+      - REST_PORT=8181
 
   trino:
-    image: docker.io/trinodb/trino:410
+    image: trinodb/trino:latest
+    container_name: trino
+    networks:
+      - iceberg_net
     ports:
-      - "8081:8080"
+      - "8282:8080"
     volumes:
       - ./catalog:/etc/trino/catalog
-      - ./data:/data
+      - ./data/iceberg_warehouse:/warehouse
+    environment:
+      - ICEBERG_WAREHOUSE_LOCATION=/warehouse
+    depends_on:
+      - iceberg-rest
+
+networks:
+  iceberg_net:
+    driver: bridge
